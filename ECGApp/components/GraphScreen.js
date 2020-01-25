@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, ScrollView, Button, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import BluetoothManager from './BluetoothManager.js';
 
 export default function GraphScreen() {
 	const [dataArr, setData] = useState(Array(12).fill(0));
@@ -36,7 +37,7 @@ export default function GraphScreen() {
 		    <ScrollView
 		      style={styles.container}
 		      contentContainerStyle={styles.contentContainer}>
-
+          <BluetoothManager/>
 		      <View style={styles.getStartedContainer}>
 	          <Text style={styles.getStartedText}>
 	            Graph
