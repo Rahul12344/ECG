@@ -1,11 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Text, View, StyleSheet, ScrollView, Button, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import BluetoothManager from './BluetoothManager.js';
+import { BleManager } from 'react-native-ble-plx';
+import BluetoothList from './BluetoothList';
 
 export default function GraphScreen() {
 	const [dataArr, setData] = useState(Array(12).fill(0));
 
+  //const [bleManager, setBleManager] = useState(new BleManager());
+  //const [bleDevicesArr, setBleDevices] = useState(Array());
+/*
+  useEffect(() => {
+    // Scan for bluetooth on component mount
+    //const bleManage = new BleManager();
+
+    //setBleManager(bleManage);
+    console.log("bluetooth mounted");
+    const subscription = this.bleManager.onStateChange((state) => {
+      if (state === 'PoweredOn') {
+        this.scanAndConnect();
+        subscription.remove();
+      }
+    }, true);
+  }, []);
+
+  const addData = () => {
+    this.props.childFunc();
+  }
+
+  const scanAndConnect = () => {
+    this.bleManager.startDeviceScan(null, null, (error, device) => {
+      if (error) {
+        // Handle error (scanning will be stopped automatically)
+        return;
+      }
+
+      let prevBleDevices = this.bleDevicesArr.slice();
+      prevBleDevices.push(device);
+      setBleDevices(prevBleDevices);
+      console.log(device.name);
+
+      
+      // Check if it is a device you are looking for based on advertisement data
+      // or other criteria.
+      if (device.name === 'TI BLE Sensor Tag' || 
+          device.name === 'SensorTag') {
+          
+          // Stop scanning as it's not necessary if you are scanning for one device.
+          this.manager.stopDeviceScan();
+
+          // Proceed with connection.
+      }
+      
+      
+    });
+  }
+*/
   const updateData = () => {
     setData( dataArr => [
       Math.random() * 50, 
@@ -24,6 +74,7 @@ export default function GraphScreen() {
       //color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})` // optional
     }]
   }
+
   const chartConfig = {
     backgroundGradientFrom: '#1E2923',
     backgroundGradientTo: '#08130D',
@@ -34,16 +85,12 @@ export default function GraphScreen() {
 		return (
 
 			<View style={styles.container}>
-		    <ScrollView
-		      style={styles.container}
-		      contentContainerStyle={styles.contentContainer}>
-          <BluetoothManager/>
+		    
 		      <View style={styles.getStartedContainer}>
 	          <Text style={styles.getStartedText}>
 	            Graph
 	          </Text>
 	        </View>
-
 	        <LineChart
 	          data={data}
 	          width={screenWidth}
@@ -63,7 +110,7 @@ export default function GraphScreen() {
 	          onPress={clearData}
 	        />
 
-		      </ScrollView>
+          <BluetoothList/>
 		    </View>
 		);
 }
