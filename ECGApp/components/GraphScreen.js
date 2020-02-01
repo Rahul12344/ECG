@@ -3,7 +3,75 @@ import { Text, View, StyleSheet, ScrollView, Button, Dimensions } from 'react-na
 import { LineChart } from 'react-native-chart-kit';
 import BluetoothManager from './BluetoothManager.js';
 
-export default function GraphScreen() {
+export default class GraphScreen extends React.Component {
+  _mounted = false;
+
+  constructor(props){
+    super(props);
+    state = {
+      data: Array(12).fill(0),
+    }
+  }
+
+  componentDidMount() {
+    this._mounted = true;
+    this.BLEdevice = this.props.screenProps.currentDevice;
+  }
+
+  screenWidth = Dimensions.get('window').width;
+
+  chartConfig = {
+    backgroundGradientFrom: '#1E2923',
+    backgroundGradientTo: '#08130D',
+    color: (opacity = 1) => `rgba(26, 255, 146, ${opacity})`,
+    strokeWidth: 2 // optional, default 3
+  };
+
+  data = {
+    datasets: [{
+      data: Array(12).fill(0),
+    }]
+  };
+  
+  
+  render() {
+		return(
+			<View style={styles.container}>
+		    <ScrollView
+		      style={styles.container}
+		      contentContainerStyle={styles.contentContainer}>
+          <BluetoothManager/>
+		      <View style={styles.getStartedContainer}>
+	          <Text style={styles.getStartedText}>
+	            Graph
+	          </Text>
+	        </View>
+
+	        <LineChart
+	          data={this.data}
+	          width={this.screenWidth}
+	          height={220}
+	          chartConfig={this.chartConfig}
+	          withShadow={false}
+	          withDots={false}
+	          withInnerLines={false}
+	        />
+
+	        <Button
+	          title="New Data"
+	        />
+	        <Button
+	          title="Reset"
+	        />
+
+		      </ScrollView>
+		    </View>
+		);
+	}
+
+}
+
+/*export default function GraphScreen() {
 	const [dataArr, setData] = useState(Array(12).fill(0));
 
   const updateData = () => {
@@ -66,7 +134,7 @@ export default function GraphScreen() {
 		      </ScrollView>
 		    </View>
 		);
-}
+}*/
 
 
 GraphScreen.navigationOptions = {

@@ -24,7 +24,8 @@ export default class BluetoothManager extends React.Component {
 	            // Handle error (scanning will be stopped automatically)
 	            return
 	        }
-	        console.log(device.name);
+			console.log(device.name);
+			this.props.screenProps.setDevice(device);
 
 	        // Check if it is a device you are looking for based on advertisement data
 	        // or other criteria.

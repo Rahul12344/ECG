@@ -1,43 +1,33 @@
 import React from 'react';
 import { SafeAreaView, View, Text, StatusBar } from 'react-native';
 
-import { createAppContainer } from 'react-navigation';
-import { createBottomTabNavigator } from 'react-navigation-tabs';
-import Icon from 'react-native-vector-icons/Ionicons';
+import Home from './screens/Home';
 
-import GraphScreen from './components/GraphScreen.js';
-import HealthScreen from './components/HealthScreen.js';
-import SettingScreen from './components/SettingScreen.js';
+export default class App extends React.Component {
 
-const TabNavigator = createBottomTabNavigator(
-  {
-    Graph: { screen: GraphScreen },
-    Health: { screen: HealthScreen },
-    Settings: { screen: SettingScreen },
-  },
-  {
-    defaultNavigationOptions: ({ navigation }) => ({
-      tabBarIcon: ({ focused, horizontal, tintColor }) => {
-        const { routeName } = navigation.state;
-        let iconName;
-        if (routeName === 'Graph') {
-          iconName = 'ios-pulse';
-        }
-        else if (routeName === 'Health') {
-          iconName = 'ios-heart';
-        }
-        else if (routeName === 'Settings') {
-          iconName = 'ios-options';
-        }
+  _mounted = false;
 
-        return <Icon name={iconName} size={25} color={tintColor} />;
-      },
-    }),
-    tabBarOptions: {
-      activeTintColor: 'dodgerblue',
-      inactiveTintColor: 'gray',
-    },
+  state = {
+    bluetoothManager: null,
+  };
+
+  setDevice = BLEmanager => () => {
+    if(this._mounted){
+      this.setState({ bluetoothManager: BLEmanager });
+    }
+  };
+
+  componentDidMount(){
+    this._mounted = true;
   }
-);
 
-export default createAppContainer(TabNavigator);
+  componentWillUnmount() {
+    this._mounted = false;
+  }
+
+  render() {
+  return (
+      <Home screenProps={{ setDevice: this.setDevice, currentDevice: this.state.bluetoothManager}}/>
+      )
+  }
+}
