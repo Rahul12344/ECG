@@ -15,13 +15,17 @@ export default class BluetoothList extends React.Component {
 
 	componentDidMount() {
 		console.log("bluetooth mounted");
-    const subscription = this.state.bleManager.onStateChange((state) => {
-      if (state === 'PoweredOn') {
-        this.scan();
-        subscription.remove();
-      }
-    }, true);
+        const subscription = this.state.bleManager.onStateChange((state) => {
+          if (state === 'PoweredOn') {
+            this.scan();
+            subscription.remove();
+          }
+        }, true);
 	}
+
+    componentWillUnmount() {
+        this.state.bleManager.stopDeviceScan();
+    }
 
     scan() {
 	    this.state.bleManager.startDeviceScan(null, null, (error, device) => {
@@ -30,6 +34,7 @@ export default class BluetoothList extends React.Component {
             return
         }
         if (device.name === null) return
+        console.log(device.name);    // is printing out bluetooth devices!
         let prevArr = this.state.devicesArr.slice();
         prevArr.push(device);
 
@@ -39,6 +44,9 @@ export default class BluetoothList extends React.Component {
 
         // Check if it is a device you are looking for based on advertisement data
         // or other criteria.
+        if (device.name === 'DCG TECH') {
+            this.state.bleManager.stopDeviceScan();
+        }
         /*if (device.name === 'TI BLE Sensor Tag' || 
             device.name === 'SensorTag') {
             
