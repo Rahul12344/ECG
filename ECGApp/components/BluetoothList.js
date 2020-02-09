@@ -1,16 +1,23 @@
 import React from 'react';
-import { Text, View, FlatList } from 'react-native';
+import { Text, View } from 'react-native';
 import { BleManager } from 'react-native-ble-plx';
 
 export default class BluetoothList extends React.Component {
 
 	constructor(props) {
 	    super(props);
-	    //this.bleManager = new BleManager();
 	    this.state = {
 	    	bleManager: new BleManager(),
-	    	devicesArr: [],
 	    };
+	}
+
+	/* TODO: What are the service UUIDs? */
+	serviceUUID(num) {
+		return "";
+	}
+
+	notifyUUID(num) {
+		return "";
 	}
 
 	componentDidMount() {
@@ -25,37 +32,57 @@ export default class BluetoothList extends React.Component {
 
     componentWillUnmount() {
         this.state.bleManager.stopDeviceScan();
-    }
+	}
+	
+	async setupNotifications(device) {
+		for (const id in this.sensors) {
+			const service = this.serviceUUID(id)
+			const characteristicN = this.notifyUUID(id)
+
+			device.monitorCharacteristicForService(service, characteristicN, (error, characteristic) => {
+				if (error) {
+					this.error(error.message)
+					return
+				}
+				//add characteristic.value value to graphs
+				//this.updateValue(characteristic.uuid, characteristic.value)
+			})
+		}
+	  }
 
     scan() {
 	    this.state.bleManager.startDeviceScan(null, null, (error, device) => {
-        if (error) {
-            // Handle error (scanning will be stopped automatically)
-            return
-        }
-        if (device.name === null) return
-        console.log(device.name);    // is printing out bluetooth devices!
-        let prevArr = this.state.devicesArr.slice();
-        prevArr.push(device);
+			if (error) {
+				// Handle error (scanning will be stopped automatically)
+				return
+			}
+			console.log("Scanning...");
 
-        this.setState({
-        	devicesArr: prevArr,
-        });
+			console.log(device.name);    // is printing out bluetooth devices!
 
-        // Check if it is a device you are looking for based on advertisement data
-        // or other criteria.
-        if (device.name === 'DCG TECH') {
-            this.state.bleManager.stopDeviceScan();
-        }
-        /*if (device.name === 'TI BLE Sensor Tag' || 
-            device.name === 'SensorTag') {
-            
-            // Stop scanning as it's not necessary if you are scanning for one device.
-            this.manager.stopDeviceScan();
+			// Name of bluetooth
+			//DCG TECH
+			if (device.name.localeCompare("DCG TECH") == 0) {
+				this.state.bleManager.stopDeviceScan();
 
-            // Proceed with connection.
-        }
-        */
+				device.connect()
+					.then((device) => {
+						console.log("Discovering services and characteristics...");
+						return device.discoverAllServicesAndCharacteristics()
+					})
+					.then((device) => {
+						// Do work on device with services and characteristics
+						console.log("Setting notifications");
+						return this.setupNotifications(device)
+					})
+					.then(() => {
+						console.log("Listening...");
+					}, (error) => {
+						// Handle errors
+						console.log("Error connecting to bluetooth device.");
+					});
+			}
+			
 	    });
 	}
 
@@ -63,12 +90,7 @@ export default class BluetoothList extends React.Component {
 		return(
 			<View>
 				<Text>Bluetooth List</Text>
-				<FlatList
-	        data={this.state.devicesArr}
-	        renderItem={({ device }) => <Text>{ device.name }</Text>}
-	        keyExtractor={ device => device.id}
-		    />
-	    </View>
+			</View>
 		);
 	}
 
