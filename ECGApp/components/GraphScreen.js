@@ -6,59 +6,95 @@ import BluetoothList from './BluetoothList';
 
 export default function GraphScreen() {
 	const [dataArr, setData] = useState(Array(12).fill(0));
-
-  //const [bleManager, setBleManager] = useState(new BleManager());
+  const [bleManager, setBleManager] = useState(new BleManager());
   //const [bleDevicesArr, setBleDevices] = useState(Array());
-/*
+
   useEffect(() => {
     // Scan for bluetooth on component mount
     //const bleManage = new BleManager();
 
     //setBleManager(bleManage);
-    console.log("bluetooth mounted");
-    const subscription = this.bleManager.onStateChange((state) => {
+    //console.log("bluetooth mounted");
+    const subscription = bleManager.onStateChange((state) => {
       if (state === 'PoweredOn') {
-        this.scanAndConnect();
+        scanAndConnect();
         subscription.remove();
       }
     }, true);
+    return () => {
+      bleManager.stopDeviceScan();
+    }
   }, []);
 
-  const addData = () => {
-    this.props.childFunc();
+  const serviceUUID = (num) => {
+    return "0000FFE0-0000-1000-8000-00805F9B34FB";
+  }
+  
+  const notifyUUID = (num) => {
+    return "0000FFE1-0000-1000-8000-00805F9B34FB";
+  }
+
+  const setupNotifications = async (product) => {
+    //for (const id in this.sensors) {
+    // what are service ID and characteristic ID?
+      const service = serviceUUID(id);
+      const characteristicN = notifyUUID(id);
+
+      device.monitorCharacteristicForService(service, characteristicN, (error, characteristic) => {
+        if (error) {
+          console.log(error.message);
+          return
+        }
+        //add characteristic.value value to graphs
+        //this.updateValue(characteristic.uuid, characteristic.value)
+        updateData(characteristic.value);
+      })
+    //}
   }
 
   const scanAndConnect = () => {
-    this.bleManager.startDeviceScan(null, null, (error, device) => {
+    bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
         // Handle error (scanning will be stopped automatically)
-        return;
+        return
       }
+      console.log("Scanning...");
 
-      let prevBleDevices = this.bleDevicesArr.slice();
-      prevBleDevices.push(device);
-      setBleDevices(prevBleDevices);
-      console.log(device.name);
+      console.log(device.name);    // is printing out bluetooth devices!
+      console.log(device.id);
 
-      
-      // Check if it is a device you are looking for based on advertisement data
-      // or other criteria.
-      if (device.name === 'TI BLE Sensor Tag' || 
-          device.name === 'SensorTag') {
-          
-          // Stop scanning as it's not necessary if you are scanning for one device.
-          this.manager.stopDeviceScan();
+      // Checks for null
+      if (!device || !device.name) return;
 
-          // Proceed with connection.
+      // Name of bluetooth = DCG TECH
+      if (device.name.localeCompare("Amy’s MacBook Air") == 0) {
+        console.log("Found device!");
+        bleManager.stopDeviceScan();
+
+        device.connect()
+          .then((device) => {
+            console.log("Discovering services and characteristics...");
+            return device.discoverAllServicesAndCharacteristics()
+          })
+          .then((device) => {
+            // Do work on device with services and characteristics
+            console.log("Setting notifications");
+            return setupNotifications(device)
+          })
+          .then(() => {
+            console.log("Listening...");
+          }, (error) => {
+            // Handle errors
+            console.log("Error connecting to bluetooth device.");
+          });
       }
       
-      
-    });
+     });
   }
-*/
-  const updateData = () => {
+
+  const updateData = (data) => {
     setData( dataArr => [
-      Math.random() * 50, 
+      data, 
       ...dataArr.slice(0, -1)
     ]);
   };
@@ -100,17 +136,16 @@ export default function GraphScreen() {
 	          withDots={false}
 	          withInnerLines={false}
 	        />
-
 	        <Button
 	          title="New Data"
-	          onPress={updateData}
+	          onPress={() => updateData(Math.random() * 50)}
 	        />
 	        <Button
 	          title="Reset"
 	          onPress={clearData}
 	        />
 
-          <BluetoothList/>
+          
 		    </View>
 		);
 }

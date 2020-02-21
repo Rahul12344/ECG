@@ -13,11 +13,11 @@ export default class BluetoothList extends React.Component {
 
 	/* TODO: What are the service UUIDs? */
 	serviceUUID(num) {
-		return "";
+		return "0000FFE0-0000-1000-8000-00805F9B34FB";
 	}
 
 	notifyUUID(num) {
-		return "";
+		return "0000FFE1-0000-1000-8000-00805F9B34FB";
 	}
 
 	componentDidMount() {
