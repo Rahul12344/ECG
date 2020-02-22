@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, ScrollView, Button, Dimensions } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Button, Dimensions, AsyncStorage, } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { BleManager } from 'react-native-ble-plx';
 import BluetoothList from './BluetoothList';
 
 export default function GraphScreen() {
+  const [timesArr, setTimes] = useState(Array(12).fill(0));
 	const [dataArr, setData] = useState(Array(12).fill(0));
   const [bleManager, setBleManager] = useState(new BleManager());
   //const [bleDevicesArr, setBleDevices] = useState(Array());
@@ -29,7 +30,7 @@ export default function GraphScreen() {
   const serviceUUID = (num) => {
     return "0000FFE0-0000-1000-8000-00805F9B34FB";
   }
-  
+
   const notifyUUID = (num) => {
     return "0000FFE1-0000-1000-8000-00805F9B34FB";
   }
@@ -47,7 +48,8 @@ export default function GraphScreen() {
         }
         //add characteristic.value value to graphs
         //this.updateValue(characteristic.uuid, characteristic.value)
-        updateData(characteristic.value);
+        console.log(characteristic.value);
+        updateData(parseInt(characteristic.value));
       })
     //}
   }
@@ -97,6 +99,11 @@ export default function GraphScreen() {
       data, 
       ...dataArr.slice(0, -1)
     ]);
+
+    setTimes( timesArr => [
+      (new Date()).getTime(), 
+      ...timesArr.slice(0, -1)
+    ]);
   };
 
   const clearData = () => {
@@ -105,11 +112,23 @@ export default function GraphScreen() {
 
   const screenWidth = Dimensions.get('window').width
   const data = {
+    //labels: timesArr,
     datasets: [{
       data: dataArr,
       //color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})` // optional
     }]
   }
+
+  storeData = async (data) => {
+    var date = new Date().getDate() + '/' + new Date().getMonth() + '/' + new Date().getFullYear();
+    var time = new Date().getHours() + '/' + new Date().getMinutes() + '/' + new Date().getSeconds();
+    var dataKey = date + ' ' + time;
+    try {
+      await AsyncStorage.setItem(dataKey, data.toString());
+    } catch (error){
+      //error
+    }
+  };
 
   const chartConfig = {
     backgroundGradientFrom: '#1E2923',
@@ -144,7 +163,10 @@ export default function GraphScreen() {
 	          title="Reset"
 	          onPress={clearData}
 	        />
-
+          <Button
+            title="Stop and Save"
+            onPress={() => this.storeData(this.state.dataArr)}
+          />
           
 		    </View>
 		);
