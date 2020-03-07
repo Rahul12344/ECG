@@ -9,6 +9,13 @@ export default function GraphScreen() {
   const [timesArr, setTimes] = useState(Array(100).fill(0));
 	const [dataArr, setData] = useState(Array(100).fill(0));
   const [bleManager, setBleManager] = useState(new BleManager());
+  //var options = new BleManagerOptions();
+  //options.restoreStateIdentifier = "234567890sadfashdfh";
+  //const bleManager = new BleManager();
+  //let key = CBCentralManagerOptionRestoreIdentifierKey
+  /*this.manager = BluetoothManager(queue: queue, options: [
+      key: "some.unique.string" as AnyObject
+  ])*/
   //const [device, setDevice] = useState(null);
   const [isRunning, setIsRunning] = useState(true);
 
@@ -24,6 +31,7 @@ export default function GraphScreen() {
     const subscription = bleManager.onStateChange((state) => {
       if (state === 'PoweredOn') {
         // first check for connected devices
+        /*
         var connected = false;
         var serviceIDs = [serviceUUID()];
         bleManager.connectedDevices(serviceIDs)
@@ -50,7 +58,8 @@ export default function GraphScreen() {
 
         if (!connected) {
           scanAndConnect();
-        }
+        }*/
+        scanAndConnect();
         subscription.remove();
       }
     }, true);
@@ -67,6 +76,18 @@ export default function GraphScreen() {
     return "0000ffe1-0000-1000-8000-00805f9b34fb";
   }
 
+  const base64ToDecimal = (base64) => {
+    var ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+    var decimal = 0;
+    for (var i = 0, len = 2; i < len; i++) {
+        decimal *= 64;
+        decimal += ALPHA.indexOf(base64[i]);
+    }
+
+    return decimal/16;
+  }
+
   const setupNotifications = async (device) => {
     //for (const id in this.sensors) {
     // what are service ID and characteristic ID?
@@ -81,22 +102,25 @@ export default function GraphScreen() {
         //add characteristic.value value to graphs
         //this.updateValue(characteristic.uuid, characteristic.value)
 
-        console.log(typeof characteristic.value);
-        var data = new Uint8Array(characteristic.value);
+        //console.log(typeof characteristic.value);
+        //var data = new Uint8Array(characteristic.value);
 
         //data[0] = characteristic.value;
         //console.log('Data received: [' + data[0] +', ' + data[1] + ', ' + data[2] + ', ' + data[3] + ', ' + data[4]);
-        if (data[0] === 0xAD) {
+        /*if (data[0] === 0xAD) {
           var value = (data[4] << 24) | (data[3] << 16) | (data[2] << 8) | data[1];
           //console.log(value);
 
           //console.log(base64.decode(characteristic.value));
           //console.log(byteArrayToUInt8(base64ToByteArray(characteristic.value)));
 
-        }
+        }*/
         //console.log(characteristic.value);
-        if (!isNaN(characteristic.value)) 
-          updateData(characteristic.value);
+        var decimal = base64ToDecimal(characteristic.value);
+        console.log(decimal);
+        //if (!isNaN(base64ToDecimal(characteristic.value)))
+
+        updateData(decimal);
       })
     //}
   }
@@ -142,8 +166,8 @@ export default function GraphScreen() {
 
         bleManager.stopDeviceScan();
 
-        connectToDevice(device);
-        /*
+        //connectToDevice(device);
+        
         device.connect()
           .then((device) => {
             console.log("Discovering services and characteristics...");
@@ -160,7 +184,7 @@ export default function GraphScreen() {
             // Handle errors
             console.log("Error connecting to bluetooth device.");
           });
-        */
+        
       }
       
      });

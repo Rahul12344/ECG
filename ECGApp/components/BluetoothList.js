@@ -11,7 +11,6 @@ export default class BluetoothList extends React.Component {
 	    };
 	}
 
-	/* TODO: What are the service UUIDs? */
 	/* http://www.martyncurrey.com/hm-10-bluetooth-4ble-modules/ */
 	serviceUUID(num) {
 		return "0000FFE0-0000-1000-8000-00805F9B34FB";
